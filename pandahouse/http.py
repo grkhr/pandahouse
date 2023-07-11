@@ -32,12 +32,13 @@ def prepare(query, connection=None, external=None):
         files[name] = serialized
 
     host = connection['host']
+    headers = connection.get('headers')
 
-    return host, params, files
+    return host, params, files, headers
 
 
 def execute(query, connection=None, data=None, external=None, stream=False, verify=True):
-    host, params, files = prepare(query, connection, external=external)
+    host, params, files, headers = prepare(query, connection, external=external)
 
     # default limits of HTTP url length, for details see:
     # https://clickhouse.yandex/docs/en/single/index.html#http-interface
@@ -45,7 +46,7 @@ def execute(query, connection=None, data=None, external=None, stream=False, veri
         data = params.pop('query', None)
 
     # basic auth
-    kwargs = dict(params=params, data=data, stream=stream, files=files, verify=verify)
+    kwargs = dict(params=params, data=data, stream=stream, files=files, verify=verify, headers=headers)
     if 'user' in params and 'password' in params:
         kwargs['auth'] = (params['user'], params['password'])
         del params['user']
