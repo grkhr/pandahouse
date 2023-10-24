@@ -16,6 +16,7 @@ class ClickhouseException(Exception):
 
 def prepare(query, connection=None, external=None):
     connection = merge(_default, connection or {})
+    cfg = connection.get('config', {})
     database = escape(connection['database'])
     query = query.format(db=database)
     params = {'database': connection['database'],
@@ -34,6 +35,7 @@ def prepare(query, connection=None, external=None):
     host = connection['host']
     headers = connection.get('headers')
 
+    params = merge(params, cfg)
     return host, params, files, headers
 
 
@@ -51,7 +53,6 @@ def execute(query, connection=None, data=None, external=None, stream=False, veri
         kwargs['auth'] = (params['user'], params['password'])
         del params['user']
         del params['password']
-
     response = requests.post(host, **kwargs)
 
     try:
